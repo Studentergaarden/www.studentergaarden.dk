@@ -12,15 +12,16 @@ $altLanLabel = ($curLanguage == "da") ? "Eng" : "Dansk";
 $content = "";
 
 if($action){
-
 	
 	if (!PhpCaptcha::Validate(strtoupper($_POST['user_code']))) {
-	  die("You have not the five control letters correctly. Try again<br><br><a href=fremleje.php?language=english>back</a>");
+	  // Der er vigtigt at vi bruger browseren til at give et link tilbage. Og ikke giver en url,
+	  // for så er alt indtastet tabt.
+	  die('You have not the five control letters correctly. Try again<br><br><a href="javascript:history.back()">Go Back</a>');
 	}
 
 	require_once("includes/phpmailer/class.phpmailer.php"); //Extern funktion PHPmailer
 	$subject    = $_POST["subject"]; //Brevets subject
-	$content    = $_POST["content"]; //Brevets indhold
+	$body       = $_POST["content"]; //Brevets indhold
 	$name       = $_POST["name"];    //Afsenders navn
 	$email      = $_POST["email"];   //Afsenders e-mail adresse
 	$mobil	    = $_POST["mobil"];	//Afsenders mobilnummer
@@ -32,7 +33,7 @@ if($action){
 	$phpmail->Subject  =  stripslashes($subject).'';
 	// convert to html.
 	//$phpmail->Body  =  stripslashes(str_replace("\n","<br />",$content));
-	$phpmail->Body  =  stripslashes($content);
+	$phpmail->Body  =  stripslashes($body);
 	$phpmail->Body  .= "\n\nØnske om fremleje skrevet på www.studentergaarden.dk af: $name, $mobil, $email";
 	$phpmail->Body  .= "\nHusk at $name ikke kan læse dette forum. Kontakt vedkommende på mail eller mobil.";
 	$phpmail->From     = $email;
@@ -47,7 +48,14 @@ if($action){
 	{
 		$content .= "Mailer Error: " . $phpmail->ErrorInfo;
 	}else{
-		$content .= "Your application has been emailed to Studentergårdens mailingslist for subletting <br>";
+	  if ($curLanguage == "da"){
+		$content .= "<b>Din ansøgning er sendt til Studentergårdens mailingliste for fremleje.</b> <br>";
+		$content .= "<b>Vi får en del flere ansøgninger end der er fremlejere, så det er desværre langt fra sikkert der er et værelse ledigt. Du bliver kun kontaktet hvis der er en fremlejer</b> <br>";
+	  }else{
+		$content .= "<b>Your application has been emailed to Studentergårdens mailing list for subletting</b> <br>";
+		$content .= "<b>We get way more applications than there are subletters. Unfortunately. You will only be contacted if there is a room available. Best of luck!</b> <br>";
+	
+	  }
 	}
 }
 
